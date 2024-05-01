@@ -8,6 +8,7 @@ setup(
     author_email='your@email.com',
     packages=['devzery_middleware'],
     install_requires=[
-        'Django>=3.0',
+        'Django>=3.0.0',
+        'requests>=2.31.0'
     ],
 )
