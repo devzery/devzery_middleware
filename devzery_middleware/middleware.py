@@ -48,7 +48,10 @@ class RequestResponseLoggingMiddleware(MiddlewareMixin):
         # if self.api_endpoint:
         try:
             if self.api_key and self.source_name :
-                headers = {'Authorization': f'Bearer {self.api_key}', 'Source_Name': self.source_name}
+                headers = {
+                    'Authorization': f'Bearer {self.api_key}',
+                    'Source-Name': self.source_name
+                }
                 response1 = requests.post(self.api_endpoint, json=data, headers=headers)
                 if response1.status_code != 200:
                     print(f"Failed to send data to API endpoint. Status code: {response1.status_code}")
