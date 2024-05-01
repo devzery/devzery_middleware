@@ -4,4 +4,5 @@ Version: 1.0.0
 Summary: SDK for capturing API requests and responses in Django
 Author: Devzery
 Author-email: your@email.com
-Requires-Dist: Django>=3.0
+Requires-Dist: Django>=3.0.0
+Requires-Dist: requests>=2.31.0
