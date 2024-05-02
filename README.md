@@ -2,9 +2,8 @@
 
 ## Installation
 
-```
-pip install git+https://github.com/devzery/devzery_middleware.git
-```
+
+`pip install git+https://github.com/devzery/devzery_middleware.git`
 
 ## Usage
 

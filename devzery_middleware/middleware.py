@@ -8,7 +8,7 @@ from django.utils.deprecation import MiddlewareMixin
 class RequestResponseLoggingMiddleware(MiddlewareMixin):
     def __init__(self, get_response=None):
         super().__init__(get_response)
-        self.api_endpoint = "http://localhost:8081/api"
+        self.api_endpoint = settings.DEVZERY_URL if settings.DEVZERY_URL else "http://localhost:8081/api"
         self.api_key = settings.DEVZERY_API_KEY
         self.source_name = settings.DEVZERY_SOURCE_NAME
 
@@ -22,11 +22,14 @@ class RequestResponseLoggingMiddleware(MiddlewareMixin):
 
         if request.content_type == 'application/json':
             body = json.loads(request.body) if request.body else None
+            response_content = response.content.decode('utf-8'),
         elif request.content_type.startswith('multipart/form-data') or request.content_type.startswith(
                 'application/x-www-form-urlencoded'):
             body = parse_qs(request.body.decode('utf-8'))
+            response_content = response.content.decode('utf-8'),
         else:
             body = None
+            response_content = None
 
         data = {
             'request': {
@@ -37,7 +40,7 @@ class RequestResponseLoggingMiddleware(MiddlewareMixin):
             },
             'response': {
                 'status_code': response.status_code,
-                'content': response.content.decode('utf-8'),
+                'content': response_content
             },
             'elapsed_time': elapsed_time,
         }
@@ -47,7 +50,7 @@ class RequestResponseLoggingMiddleware(MiddlewareMixin):
 
         # if self.api_endpoint:
         try:
-            if self.api_key and self.source_name :
+            if (self.api_key and self.source_name) and (response_content is not None) :
                 headers = {
                     'Authorization': f'Bearer {self.api_key}',
                     'Source-Name': self.source_name
@@ -55,8 +58,10 @@ class RequestResponseLoggingMiddleware(MiddlewareMixin):
                 response1 = requests.post(self.api_endpoint, json=data, headers=headers)
                 if response1.status_code != 200:
                     print(f"Failed to send data to API endpoint. Status code: {response1.status_code}")
-            else:
+            elif (self.api_key and self.source_name):
                 print("Devzery: No API Key or Source given!")
+            else:
+                print(f"Devzery: Skipping Hit {request.get_full_path()}")
         except requests.exceptions.RequestException as e:
             print(f"Error occurred while sending data to API endpoint: {e}")
 
