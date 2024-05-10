@@ -56,7 +56,7 @@ class RequestResponseLoggingMiddleware(MiddlewareMixin):
                 response1 = requests.post(self.api_endpoint, json=data, headers=headers)
                 if response1.status_code != 200:
                     print(f"Failed to send data to API endpoint. Status code: {response1.status_code}")
-            elif (self.api_key and self.source_name):
+            elif not (self.api_key or self.source_name):
                 print("Devzery: No API Key or Source given!")
             else:
                 print(f"Devzery: Skipping Hit {request.get_full_path()}")
