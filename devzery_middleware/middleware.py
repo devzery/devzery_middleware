@@ -45,15 +45,11 @@ class RequestResponseLoggingMiddleware(MiddlewareMixin):
             'elapsed_time': elapsed_time,
         }
 
-        # Log the captured data (you can customize this part)
-        # print(json.dumps(data, indent=4))
-
-        # if self.api_endpoint:
         try:
             if (self.api_key and self.source_name) and (response_content is not None) :
                 headers = {
-                    'Authorization': f'Bearer {self.api_key}',
-                    'Source-Name': self.source_name
+                    'x-access-token': {self.api_key},
+                    'source-name': self.source_name
                 }
                 response1 = requests.post(self.api_endpoint, json=data, headers=headers)
                 if response1.status_code != 200:
