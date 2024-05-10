@@ -45,6 +45,8 @@ class RequestResponseLoggingMiddleware(MiddlewareMixin):
             'elapsed_time': elapsed_time,
         }
 
+        print(data)
+
         try:
             if (self.api_key and self.source_name) and (response_content is not None) :
                 headers = {
