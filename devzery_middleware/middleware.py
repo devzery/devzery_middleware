@@ -1,6 +1,7 @@
+import asyncio
 import json
 import time
-import requests
+import aiohttp
 from urllib.parse import parse_qs
 from django.conf import settings
 from django.utils.deprecation import MiddlewareMixin
@@ -14,6 +15,22 @@ class RequestResponseLoggingMiddleware(MiddlewareMixin):
 
     def process_request(self, request):
         request.start_time = time.time()
+
+    async def send_data_to_api(self, data, response_content):
+        try:
+            if (self.api_key and self.source_name) and (response_content is not None):
+                headers = {
+                    'x-access-token': self.api_key,
+                    'source-name': self.source_name
+                }
+                async with aiohttp.ClientSession() as session:
+                    async with session.post(self.api_endpoint, json=data, headers=headers) as response1:
+                        if response1.status != 200:
+                            print(f"Failed to send data to API endpoint. Status code: {response1.status}")
+            elif (self.api_key and self.source_name):
+                print("Devzery: No API Key or Source given!")
+        except aiohttp.ClientError as e:
+            print(f"Error occurred while sending data to API endpoint: {e}")
 
     def process_response(self, request, response):
 
@@ -45,21 +62,7 @@ class RequestResponseLoggingMiddleware(MiddlewareMixin):
             'elapsed_time': elapsed_time,
         }
 
-        try:
-            if (self.api_key and self.source_name) and (response_content is not None) :
-                headers = {
-                    'x-access-token': {self.api_key},
-                    'source-name': self.source_name
-                }
-                response1 = requests.post(self.api_endpoint, json=data, headers=headers)
-                if response1.status_code != 200:
-                    print(f"Failed to send data to API endpoint. Status code: {response1.status_code}")
-            elif (self.api_key and self.source_name):
-                print("Devzery: No API Key or Source given!")
-            else:
-                print(f"Devzery: Skipping Hit {request.get_full_path()}")
-        except requests.exceptions.RequestException as e:
-            print(f"Error occurred while sending data to API endpoint: {e}")
+        asyncio.ensure_future(self.send_data_to_api(data, response_content))
 
         return response
 
