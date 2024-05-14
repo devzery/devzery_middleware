@@ -6,6 +6,7 @@ from urllib.parse import parse_qs
 from django.conf import settings
 from django.utils.deprecation import MiddlewareMixin
 
+
 class RequestResponseLoggingMiddleware(MiddlewareMixin):
     def __init__(self, get_response=None):
         super().__init__(get_response)
@@ -35,10 +36,12 @@ class RequestResponseLoggingMiddleware(MiddlewareMixin):
     def process_response(self, request, response):
 
         elapsed_time = time.time() - request.start_time
-        headers = {key: value for key, value in request.META.items() if key.startswith('HTTP_') or key in ['CONTENT_LENGTH', 'CONTENT_TYPE']}
+        headers = {key: value for key, value in request.META.items() if
+                   key.startswith('HTTP_') or key in ['CONTENT_LENGTH', 'CONTENT_TYPE']}
 
         if request.content_type == 'application/json':
             body = json.loads(request.body) if request.body else None
+
         elif request.content_type.startswith('multipart/form-data') or request.content_type.startswith(
                 'application/x-www-form-urlencoded'):
             body = parse_qs(request.body.decode('utf-8'))
@@ -68,6 +71,7 @@ class RequestResponseLoggingMiddleware(MiddlewareMixin):
         }
 
         asyncio.ensure_future(self.send_data_to_api(data, response_content))
+        
 
         return response
 
