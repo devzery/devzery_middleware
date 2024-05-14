@@ -40,6 +40,7 @@ class RequestResponseLoggingMiddleware(MiddlewareMixin):
 
         if request.content_type == 'application/json':
             body = json.loads(request.body) if request.body else None
+
         elif request.content_type.startswith('multipart/form-data') or request.content_type.startswith(
                 'application/x-www-form-urlencoded'):
             body = parse_qs(request.body.decode('utf-8'))
@@ -67,5 +68,6 @@ class RequestResponseLoggingMiddleware(MiddlewareMixin):
         }
 
         threading.Thread(target=self.send_data_to_api_sync, args=(data, response_content)).start()
+
 
         return response
