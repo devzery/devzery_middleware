@@ -39,13 +39,18 @@ class RequestResponseLoggingMiddleware(MiddlewareMixin):
 
         if request.content_type == 'application/json':
             body = json.loads(request.body) if request.body else None
-            response_content = response.content.decode('utf-8'),
         elif request.content_type.startswith('multipart/form-data') or request.content_type.startswith(
                 'application/x-www-form-urlencoded'):
             body = parse_qs(request.body.decode('utf-8'))
-            response_content = response.content.decode('utf-8'),
         else:
             body = None
+
+
+
+        try:
+            response_content = response.content.decode('utf-8')
+            json.loads(response_content)
+        except:
             response_content = None
 
         data = {
