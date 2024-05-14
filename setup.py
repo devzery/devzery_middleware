@@ -9,6 +9,6 @@ setup(
     packages=['devzery_middleware'],
     install_requires=[
         'Django>=3.0.0',
-        'aiohttp>=3.0.0'
+        'requests>=2.0.0'
     ],
 )
