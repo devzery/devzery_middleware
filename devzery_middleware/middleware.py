@@ -15,6 +15,7 @@ class RequestResponseLoggingMiddleware(MiddlewareMixin):
 
     def process_request(self, request):
         request.start_time = time.time()
+        request._body = request.body
 
     def process_response(self, request, response):
 
@@ -23,11 +24,11 @@ class RequestResponseLoggingMiddleware(MiddlewareMixin):
                    key.startswith('HTTP_') or key in ['CONTENT_LENGTH', 'CONTENT_TYPE']}
 
         if request.content_type == 'application/json':
-            body = json.loads(request.body) if request.body else None
+            body = json.loads(request._body) if request._body else None
 
         elif request.content_type.startswith('multipart/form-data') or request.content_type.startswith(
                 'application/x-www-form-urlencoded'):
-            body = parse_qs(request.body.decode('utf-8'))
+            body = parse_qs(request._body.decode('utf-8'))
 
         else:
             body = None
