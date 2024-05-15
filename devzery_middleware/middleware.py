@@ -1,6 +1,7 @@
+import threading
+import requests
 import json
 import time
-import requests
 from urllib.parse import parse_qs
 from django.conf import settings
 from django.utils.deprecation import MiddlewareMixin
@@ -16,6 +17,21 @@ class RequestResponseLoggingMiddleware(MiddlewareMixin):
     def process_request(self, request):
         request.start_time = time.time()
         request._body = request.body
+
+    def send_data_to_api_sync(self, data, response_content):
+        try:
+            if (self.api_key and self.source_name) and (response_content is not None):
+                headers = {
+                    'x-access-token': self.api_key,
+                    'source-name': self.source_name
+                }
+                response1 = requests.post(self.api_endpoint.replace('https', 'http'), json=data, headers=headers)
+                if response1.status_code != 200:
+                    print(f"Failed to send data to API endpoint. Status code: {response1.status_code}")
+            elif (self.api_key and self.source_name):
+                print("Devzery: No API Key or Source given!")
+        except requests.RequestException as e:
+            print(f"Error occurred while sending data to API endpoint: {e}")
 
     def process_response(self, request, response):
 
@@ -33,9 +49,8 @@ class RequestResponseLoggingMiddleware(MiddlewareMixin):
         else:
             body = None
 
-        response_content = response.content.decode('utf-8')
-
         try:
+            response_content = response.content.decode('utf-8')
             json.loads(response_content)
         except:
             response_content = None
@@ -54,23 +69,6 @@ class RequestResponseLoggingMiddleware(MiddlewareMixin):
             'elapsed_time': elapsed_time,
         }
 
-        print(data)
-
-        try:
-            if (self.api_key and self.source_name) and (response_content is not None):
-                headers = {
-                    'x-access-token': self.api_key,
-                    'source-name': self.source_name
-                }
-                response1 = requests.post(self.api_endpoint, json=data, headers=headers)
-                if response1.status_code != 200:
-                    print(f"Failed to send data to API endpoint. Status code: {response1.status_code}")
-            elif not (self.api_key or self.source_name):
-                print("Devzery: No API Key or Source given!")
-            else:
-                print(f"Devzery: Skipping Hit {request.get_full_path()}")
-        except requests.exceptions.RequestException as e:
-            print(f"Error occurred while sending data to API endpoint: {e}")
+        threading.Thread(target=self.send_data_to_api_sync, args=(data, response_content)).start()
 
         return response
-
