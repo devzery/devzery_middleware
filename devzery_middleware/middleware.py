@@ -34,41 +34,46 @@ class RequestResponseLoggingMiddleware(MiddlewareMixin):
             print(f"Error occurred while sending data to API endpoint: {e}")
 
     def process_response(self, request, response):
-
-        elapsed_time = time.time() - request.start_time
-        headers = {key: value for key, value in request.META.items() if
-                   key.startswith('HTTP_') or key in ['CONTENT_LENGTH', 'CONTENT_TYPE']}
-
-        if request.content_type == 'application/json':
-            body = json.loads(request._body) if request._body else None
-
-        elif request.content_type.startswith('multipart/form-data') or request.content_type.startswith(
-                'application/x-www-form-urlencoded'):
-            body = parse_qs(request._body.decode('utf-8'))
-
-        else:
-            body = None
-
         try:
-            response_content = response.content.decode('utf-8')
-            json.loads(response_content)
-        except:
-            response_content = None
+            elapsed_time = time.time() - request.start_time
+            headers = {key: value for key, value in request.META.items() if
+                       key.startswith('HTTP_') or key in ['CONTENT_LENGTH', 'CONTENT_TYPE']}
 
-        data = {
-            'request': {
-                'method': request.method,
-                'path': request.get_full_path(),
-                'headers': headers,
-                'body': body,
-            },
-            'response': {
-                'status_code': response.status_code,
-                'content': response_content
-            },
-            'elapsed_time': elapsed_time,
-        }
+            if request.content_type == 'application/json':
+                body = json.loads(request._body) if request._body else None
 
-        threading.Thread(target=self.send_data_to_api_sync, args=(data, response_content)).start()
+            elif request.content_type.startswith('multipart/form-data') or request.content_type.startswith(
+                    'application/x-www-form-urlencoded'):
+                body = parse_qs(request._body.decode('utf-8'))
 
-        return response
+            else:
+                body = None
+
+            try:
+                response_content = response.content.decode('utf-8')
+                json.loads(response_content)
+            except:
+                response_content = None
+
+            data = {
+                'request': {
+                    'method': request.method,
+                    'path': request.get_full_path(),
+                    'headers': headers,
+                    'body': body,
+                },
+                'response': {
+                    'status_code': response.status_code,
+                    'content': response_content
+                },
+                'elapsed_time': elapsed_time,
+            }
+
+            threading.Thread(target=self.send_data_to_api_sync, args=(data, response_content)).start()
+
+            return response
+
+        except Exception as e:
+
+            print(f"Devzery: Error occurred Capturing: {e}")
+            return response
