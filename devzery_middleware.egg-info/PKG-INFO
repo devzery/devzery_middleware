@@ -1,8 +1,8 @@
 Metadata-Version: 2.1
 Name: devzery-middleware
-Version: 1.0.0
+Version: 0.0.3
 Summary: SDK for capturing API requests and responses in Django
 Author: Devzery
 Author-email: your@email.com
 Requires-Dist: Django>=3.0.0
-Requires-Dist: requests>=2.31.0
+Requires-Dist: requests>=2.0.0
