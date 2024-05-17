@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='devzery_middleware',
-    version='0.0.4',
+    version='0.0.5',
     description='SDK for capturing API requests and responses in Django',
     author='Devzery',
     author_email='your@email.com',
