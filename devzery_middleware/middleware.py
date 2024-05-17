@@ -10,9 +10,11 @@ from django.utils.deprecation import MiddlewareMixin
 class RequestResponseLoggingMiddleware(MiddlewareMixin):
     def __init__(self, get_response=None):
         super().__init__(get_response)
-        self.api_endpoint = getattr(settings, 'DEVZERY_URL', "https://server-v3-7qxc7hlaka-uc.a.run.app/api/add")
+        self.api_endpoint = settings.DEVZERY_URL if settings.DEVZERY_URL else "https://server-v3-7qxc7hlaka-uc.a.run.app/api/add"
         self.api_key = settings.DEVZERY_API_KEY
         self.source_name = settings.DEVZERY_SOURCE_NAME
+
+        print(self.api_endpoint)
 
     def process_request(self, request):
         request.start_time = time.time()

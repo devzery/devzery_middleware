@@ -11,7 +11,7 @@ Add the following command to your `settings.py`:
 
 ```python
 MIDDLEWARE = [
-    'devzery_middleware.middleware.RequestResponseLoggingMiddleware',
+    "devzery_middleware.middleware.RequestResponseLoggingMiddleware",
 ]
 
 DEVZERY_API_KEY = "YOUR API KEY"
